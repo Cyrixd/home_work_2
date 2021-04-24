@@ -45,9 +45,9 @@ def main(path_to_books="../examples/books.csv",
 
 if __name__ == "__main__":
     result = main()
-    if os.path.isfile("./output.json"):
-        os.remove("./output.json")
+    if os.path.isfile("./result.json"):
+        os.remove("./result.json")
 
-    with open("output.json", "w") as output:
+    with open("result.json", "w") as output:
         json.dump(result, output)
-    print("File output.json was created.")
+    print("File result.json was created.")
