@@ -1,6 +1,7 @@
 import copy
 import csv
 import json
+import os
 
 
 def get_output_template(example_file):
@@ -9,17 +10,17 @@ def get_output_template(example_file):
     return {"user": example_data.keys(), "book": example_data["books"][0].keys()}
 
 
-def get_normalized_users_list(file_with_users: str) -> list:
+def get_normalized_users_list(file_with_users: str, file_with_example: str) -> list:
     with open(file_with_users, "r") as users_file:
         users = json.load(users_file)
-    template = get_output_template("example.json")
+    template = get_output_template(file_with_example)
     return [{key: value for key, value in user.items() if key in template["user"]} for user in users]
 
 
-def get_normalized_books_list(file_with_books: str) -> list:
+def get_normalized_books_list(file_with_books: str, file_with_example: str) -> list:
     with open(file_with_books, newline='') as books_file:
         books = csv.DictReader(books_file)
-        template = get_output_template("example.json")
+        template = get_output_template(file_with_example)
         return [{key.lower(): value for key, value in book.items() if key.lower() in template["book"]} for book in books]
 
 
@@ -34,11 +35,19 @@ def add_one_book_for_all_users(users: list, books: list) -> list:
     return _users
 
 
-def main():
-    books = get_normalized_books_list("books.csv")
-    users = get_normalized_users_list("users.json")
+def main(path_to_books="../examples/books.csv",
+         path_to_users="../examples/users.json",
+         path_to_example="../examples/example.json"):
+    books = get_normalized_books_list(os.path.normpath(path_to_books), os.path.normpath(path_to_example))
+    users = get_normalized_users_list(os.path.normpath(path_to_users), os.path.normpath(path_to_example))
     return add_one_book_for_all_users(users, books)
 
 
 if __name__ == "__main__":
-    main()
+    result = main()
+    if os.path.isfile("./output.json"):
+        os.remove("./output.json")
+
+    with open("output.json", "w") as output:
+        json.dump(result, output)
+    print("File output.json was created.")
